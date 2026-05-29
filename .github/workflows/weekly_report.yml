@@ -1,0 +1,37 @@
+name: Weekly Ads Report
+
+on:
+  schedule:
+    # Every Thursday at 17:00 UTC = 20:00 Israel time (UTC+3)
+    - cron: "0 17 * * 4"
+  workflow_dispatch:  # allows manual trigger from GitHub UI
+
+jobs:
+  run-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Write credentials.json
+        run: echo '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > credentials.json
+
+      - name: Run report
+        env:
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+          META_AD_ACCOUNT_ID: ${{ secrets.META_AD_ACCOUNT_ID }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GOOGLE_SHEET_URL: ${{ secrets.GOOGLE_SHEET_URL }}
+          GOOGLE_CREDENTIALS_JSON_PATH: credentials.json
+        run: python report.py --now
