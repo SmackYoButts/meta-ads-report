@@ -13,18 +13,21 @@ def init_meta_api(access_token: str, ad_account_id: str) -> AdAccount:
     return AdAccount(account_id)
 
 
-def get_date_range(days: int = 7) -> dict:
-    end = datetime.today() - timedelta(days=1)
-    start = end - timedelta(days=days - 1)
+def get_date_range() -> dict:
+    today = datetime.today()
+    # Most recent Thursday (weekday=3); if today is Thursday, use today
+    days_since_thursday = (today.weekday() - 3) % 7
+    last_thursday = today - timedelta(days=days_since_thursday)
+    last_friday = last_thursday - timedelta(days=6)
     return {
-        "since": start.strftime("%Y-%m-%d"),
-        "until": end.strftime("%Y-%m-%d"),
+        "since": last_friday.strftime("%Y-%m-%d"),
+        "until": last_thursday.strftime("%Y-%m-%d"),
     }
 
 
 def pull_campaign_insights(access_token: str, ad_account_id: str) -> tuple[list[dict], dict]:
     account = init_meta_api(access_token, ad_account_id)
-    date_range = get_date_range(7)
+    date_range = get_date_range()
 
     fields = [
         "campaign_name",

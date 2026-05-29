@@ -1,15 +1,11 @@
-name: Weekly Ads Report
+name: On-Demand Report (Telegram)
 
 on:
   schedule:
-    # Every Thursday at 17:00 UTC = 20:00 Israel time (UTC+3)
-    - cron: "0 17 * * 4"
-  workflow_dispatch:  # allows manual trigger from GitHub UI
-  repository_dispatch:
-    types: [manual_report]  # triggered by Telegram /report command
+    - cron: "*/5 * * * *"  # every 5 minutes, 24/7
 
 jobs:
-  run-report:
+  check-and-run:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,15 +16,26 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
+
+      - name: Check for /report command
+        id: check
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: |
+          if python check_telegram.py; then
+            echo "trigger=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Install dependencies
+        if: steps.check.outputs.trigger == 'true'
         run: pip install -r requirements.txt
 
       - name: Write credentials.json
+        if: steps.check.outputs.trigger == 'true'
         run: echo '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > credentials.json
 
       - name: Run report
+        if: steps.check.outputs.trigger == 'true'
         env:
           META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
           META_AD_ACCOUNT_ID: ${{ secrets.META_AD_ACCOUNT_ID }}
