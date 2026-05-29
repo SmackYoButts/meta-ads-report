@@ -3,6 +3,7 @@ name: On-Demand Report (Telegram)
 on:
   schedule:
     - cron: "*/5 * * * *"  # every 5 minutes, 24/7
+  workflow_dispatch:  # manual trigger from GitHub UI
 
 jobs:
   check-and-run:
@@ -22,7 +23,9 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: |
-          if python check_telegram.py; then
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "trigger=true" >> $GITHUB_OUTPUT
+          elif python check_telegram.py; then
             echo "trigger=true" >> $GITHUB_OUTPUT
           fi
 

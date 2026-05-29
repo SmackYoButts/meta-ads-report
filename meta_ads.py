@@ -55,8 +55,8 @@ def pull_campaign_insights(access_token: str, ad_account_id: str) -> tuple[list[
 
     campaigns = []
     for row in insights:
-        actions = {a["action_type"]: int(a["value"]) for a in row.get("actions", [])}
-        leads = actions.get("lead", 0) + actions.get("onsite_conversion.lead_grouped", 0)
+        actions = {a["action_type"]: int(float(a["value"])) for a in row.get("actions", [])}
+        leads = actions.get("lead", 0)
 
         campaigns.append({
             "campaign_name": row.get("campaign_name", "Unknown"),
