@@ -2,7 +2,7 @@ name: On-Demand Report (Telegram)
 
 on:
   schedule:
-    - cron: "*/5 * * * *"  # every 5 minutes, 24/7
+    - cron: "*/1 * * * *"  # every minute — free on public repos
   workflow_dispatch:  # manual trigger from GitHub UI
 
 jobs:
