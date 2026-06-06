@@ -1,12 +1,10 @@
-name: Weekly Ads Report
+name: Daily Ads Report
 
 on:
   schedule:
-    # Every Thursday at 17:00 UTC = 20:00 Israel time (UTC+3)
-    - cron: "0 17 * * 4"
+    # Every day at 21:01 UTC = 00:01 Israel time (IDT, UTC+3)
+    - cron: "1 21 * * *"
   workflow_dispatch:  # allows manual trigger from GitHub UI
-  repository_dispatch:
-    types: [manual_report]  # triggered by Telegram /report command
 
 jobs:
   run-report:

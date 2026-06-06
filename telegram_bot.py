@@ -6,29 +6,35 @@ from telegram.error import TelegramError
 logger = logging.getLogger(__name__)
 
 
-def _format_number(n: int | float) -> str:
-    return f"{n:,.0f}"
-
-
-def build_message(totals: dict, sheet_url: str) -> str:
-    date_range = f"{totals['date_since']} – {totals['date_until']}"
+def build_message(campaigns: list[dict], totals: dict, sheet_url: str) -> str:
+    date = totals["date_since"]  # single day
     spend = f"₪{totals['total_spend']:,.2f}"
-    impressions = _format_number(totals["total_impressions"])
-    clicks = _format_number(totals["total_clicks"])
-    leads = _format_number(totals["total_leads"])
+    impressions = f"{totals['total_impressions']:,}"
+    clicks = f"{totals['total_clicks']:,}"
+    leads = f"{totals['total_leads']:,}"
     ctr = f"{totals['ctr']:.2f}%"
 
-    return (
-        f"📊 *Weekly Ads Report — {date_range}*\n"
-        f"\n"
-        f"💰 Total Spend: {spend}\n"
-        f"👁 Impressions: {impressions}\n"
-        f"🖱 Clicks: {clicks}\n"
-        f"📈 CTR: {ctr}\n"
-        f"🎯 Leads: {leads}\n"
-        f"\n"
-        f"📋 [View full report]({sheet_url})"
-    )
+    lines = [
+        f"📊 *Daily Ads Report — {date}*",
+        "",
+        f"💰 Total Spend: {spend}",
+        f"👁 Impressions: {impressions}",
+        f"🖱 Clicks: {clicks}",
+        f"📈 CTR: {ctr}",
+        f"🎯 Leads: {leads}",
+        "",
+        "━━━━━━━━━━━━━━━━━━━━",
+        "*Campaign Breakdown:*",
+        "",
+    ]
+
+    for c in sorted(campaigns, key=lambda x: x["spend"], reverse=True):
+        lines.append(f"📌 *{c['campaign_name']}*")
+        lines.append(f"   💰 ₪{c['spend']:,.2f}  |  🎯 {c['leads']} leads  |  📈 {c['ctr']:.2f}%")
+        lines.append("")
+
+    lines.append(f"📋 [View full report]({sheet_url})")
+    return "\n".join(lines)
 
 
 async def _send(bot_token: str, chat_id: str, text: str) -> None:
@@ -41,8 +47,8 @@ async def _send(bot_token: str, chat_id: str, text: str) -> None:
         )
 
 
-def send_report(bot_token: str, chat_id: str, totals: dict, sheet_url: str) -> None:
-    message = build_message(totals, sheet_url)
+def send_report(bot_token: str, chat_id: str, campaigns: list[dict], totals: dict, sheet_url: str) -> None:
+    message = build_message(campaigns, totals, sheet_url)
     try:
         asyncio.run(_send(bot_token, chat_id, message))
         logger.info("Telegram report sent to chat %s.", chat_id)

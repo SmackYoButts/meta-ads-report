@@ -63,7 +63,7 @@ def run_report() -> None:
 
     try:
         logger.info("Sending Telegram report...")
-        telegram_bot.send_report(bot_token, chat_id, totals, sheet_url)
+        telegram_bot.send_report(bot_token, chat_id, campaigns, totals, sheet_url)
     except Exception as e:
         logger.error("Failed to send Telegram message: %s", e)
 
