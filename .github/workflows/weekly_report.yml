@@ -2,8 +2,9 @@ name: Daily Ads Report
 
 on:
   schedule:
-    # Every day at 21:01 UTC = 00:01 Israel time (IDT, UTC+3)
-    - cron: "1 21 * * *"
+    # Every day at 20:05 UTC — targets 00:05 Israel time (IDT, UTC+3)
+    # Set 1hr early to compensate for GitHub Actions scheduling delays
+    - cron: "5 20 * * *"
   workflow_dispatch:  # allows manual trigger from GitHub UI
 
 jobs:
