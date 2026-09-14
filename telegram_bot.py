@@ -5,6 +5,8 @@ from telegram.error import TelegramError
 
 logger = logging.getLogger(__name__)
 
+DASHBOARD_URL = "https://meta-ads-dashboard-ten-theta.vercel.app"
+
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -89,11 +91,18 @@ def build_daily_message(
 
 # ── send ─────────────────────────────────────────────────────────────────────
 
+def with_dashboard_link(text: str) -> str:
+    """Every bot message ends with a link to the live dashboard."""
+    if DASHBOARD_URL in text:
+        return text
+    return f"{text}\n📱 [Open live dashboard]({DASHBOARD_URL})"
+
+
 async def _send(bot_token: str, chat_id: str, text: str) -> None:
     async with Bot(token=bot_token) as bot:
         await bot.send_message(
             chat_id=chat_id,
-            text=text,
+            text=with_dashboard_link(text),
             parse_mode="Markdown",
             disable_web_page_preview=True,
         )
